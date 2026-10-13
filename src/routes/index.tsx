@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import videoAsset from "@/assets/glass-video.mp4.asset.json";
+import webmAsset from "@/assets/glass-video.webm.asset.json";
 import posterAsset from "@/assets/glass-video-poster.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
@@ -27,7 +28,6 @@ function Index() {
           <video
             className="ambient-video"
             aria-label="Featured video"
-            src={videoAsset.url}
             poster={posterAsset.url}
             autoPlay
             muted
@@ -46,7 +46,10 @@ function Index() {
               }
             }}
             onError={() => setStatus("error")}
-          />
+          >
+            <source src={videoAsset.url} type="video/mp4" />
+            <source src={webmAsset.url} type="video/webm" />
+          </video>
           {status === "loading" && <div className="video-status" role="status" aria-label="Loading video"><span className="loading-mark" aria-hidden="true" /></div>}
           {status === "error" && <div className="video-status" role="alert">The video couldn’t load. Please refresh.</div>}
           {status === "blocked" && <div className="video-status" role="status">Your browser has blocked automatic playback.</div>}
