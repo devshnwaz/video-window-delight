@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startVideo } from "@/lib/video-playback";
@@ -22,10 +22,25 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [status, setStatus] = useState<"loading" | "ready" | "error" | "blocked">("loading");
+  const [status, setStatus] = useState<"ready" | "error" | "blocked">("ready");
   const [needsSound, setNeedsSound] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const started = useRef(false);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const start = () => {
+      if (started.current) return;
+      started.current = true;
+      void startVideo(video).then((hasSound) => setNeedsSound(!hasSound)).catch(() => {
+        setNeedsSound(true);
+        setStatus("blocked");
+      });
+    };
+    if (video.readyState >= 3) start();
+    video.addEventListener("canplay", start);
+    return () => video.removeEventListener("canplay", start);
+  }, []);
   const enableSound = async () => {
     const video = videoRef.current;
     if (!video) return;
@@ -58,23 +73,12 @@ function Index() {
             disableRemotePlayback
             onContextMenu={(event) => event.preventDefault()}
             onPlaying={() => setStatus("ready")}
-            onCanPlay={(event) => {
-              const video = event.currentTarget;
-              setStatus("ready");
-              if (started.current) return;
-              started.current = true;
-              void startVideo(video).then((hasSound) => setNeedsSound(!hasSound)).catch(() => {
-                setNeedsSound(true);
-                setStatus("blocked");
-              });
-            }}
             onError={() => setStatus("error")}
           >
             <source src={videoAsset.url} type="video/mp4" />
             <source src={webmAsset.url} type="video/webm" />
           </video>
           {needsSound && <Button variant="glass" size="icon" className="sound-enable" aria-label="Enable sound" title="Enable sound" onClick={() => void enableSound()}><Volume2 /></Button>}
-          {status === "loading" && <div className="video-status" role="status" aria-label="Loading video"><span className="loading-mark" aria-hidden="true" /></div>}
           {status === "error" && <div className="video-status" role="alert">The video couldn’t load. Please refresh.</div>}
           {status === "blocked" && <div className="video-status" role="status">Your browser has blocked automatic playback.</div>}
         </div>

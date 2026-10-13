@@ -3,3 +3,4 @@
 - [x] Verify autoplay, hidden controls, and desktop/mobile layout.
 - [ ] Restore audio and attempt audible autoplay with a browser-safe tap fallback.
 - [ ] Add livelier background motion and a thicker liquid-glass frame, then verify both layouts.
+- [ ] Remove the loading screen and keep the video preview visible during startup.
