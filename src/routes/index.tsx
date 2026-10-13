@@ -41,6 +41,7 @@ function Index() {
             onCanPlay={(event) => {
               const video = event.currentTarget;
               video.muted = true;
+              setStatus("ready");
               if (video.paused) {
                 void video.play().catch(() => setStatus("blocked"));
               }
