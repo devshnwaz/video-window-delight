@@ -1,24 +1,57 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import videoAsset from "@/assets/glass-video.mp4.asset.json";
+import posterAsset from "@/assets/glass-video-poster.jpg.asset.json";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "Still — A glass video experience" },
+      { name: "description", content: "A quiet, uninterrupted video experience in light and glass." },
+      { property: "og:title", content: "Still — A glass video experience" },
+      { property: "og:description", content: "A quiet, uninterrupted video experience in light and glass." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
+  const [status, setStatus] = useState<"loading" | "ready" | "error" | "blocked">("loading");
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="video-page" aria-label="Video experience">
+      <div className="light-ribbons" aria-hidden="true" />
+      <div className="video-glass">
+        <div className="video-surface">
+          <video
+            className="ambient-video"
+            aria-label="Featured video"
+            src={videoAsset.url}
+            poster={posterAsset.url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
+            onContextMenu={(event) => event.preventDefault()}
+            onPlaying={() => setStatus("ready")}
+            onCanPlay={(event) => {
+              const video = event.currentTarget;
+              video.muted = true;
+              if (video.paused) {
+                void video.play().catch(() => setStatus("blocked"));
+              }
+            }}
+            onError={() => setStatus("error")}
+          />
+          {status === "loading" && <div className="video-status" role="status" aria-label="Loading video"><span className="loading-mark" aria-hidden="true" /></div>}
+          {status === "error" && <div className="video-status" role="alert">The video couldn’t load. Please refresh.</div>}
+          {status === "blocked" && <div className="video-status" role="status">Your browser has blocked automatic playback.</div>}
+        </div>
+      </div>
+    </main>
   );
 }

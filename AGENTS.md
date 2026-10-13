@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep the single video experience at the index route and its visual system in shared CSS, so desktop and mobile use the same presentation.
+- Import hosted media through generated asset pointers, so the application does not depend on the source file host.
